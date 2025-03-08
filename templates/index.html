@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Movie Recommender</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+            background-color: #001a33;
+        }
+        .movie-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .movie-card img {
+            height: 250px;
+            width: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .movie-card h5, .movie-card p {
+            margin: 10px 0;
+        }
+        #recommendationSection, #topRatedSection {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <img src="/static/pic11.png" alt="Logo" style="width: 45px; height: auto; margin-right: 10px;">
+        <a class="navbar-brand" href="/">Movie Buzz</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#topRatedSection">Top Rated</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+            </ul>
+            <button class="btn btn-success">Login</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Bootstrap Carousel -->
+<div id="carouselExampleSlidesOnly" class="carousel slide position-relative" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="/static/img3.jpg" class="d-block w-100" style="height: 50vh; object-fit: cover;" alt="Image">
+
+            <!-- Centered Search Box -->
+            <div class="position-absolute top-50 start-50 translate-middle text-center w-50">
+                <div class="container text-center">
+                    <h2 class="text-start" style="padding-bottom:10px; color: #ffffff">Welcome.</h2>
+                    <h4 class="text-start" style="padding-bottom:10px;color: #ffffff">More than Nine Thousand Movies To Discover.</h4>
+                    <div class="input-group mb-3">
+                        <input type="text" id="searchInput" class="form-control" list="movieSuggestions" style="height:45px" placeholder="Enter movie name">
+                        <datalist id="movieSuggestions"></datalist>
+                        <button class="btn btn-primary" onclick="searchMovie()">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommended Movies Section -->
+<div class="container mt-5" id="recommendationSection">
+    <h4 class="text-center mb-4" style="text-decoration: underline">Recommended Movies</h4>
+    <div class="row row-cols-1 row-cols-md-4 g-4" id="moviesContainer"></div>
+</div>
+
+<!-- Top Rated Movies Section -->
+<div class="container mt-5" id="topRatedSection" style="display: none;">
+    <h4 class="text-center mb-4" style="text-decoration: underline">Top Rated Movies</h4>
+    <div class="row row-cols-1 row-cols-md-4 g-4" id="topRatedMoviesContainer"></div>
+</div>
+
+<!-- Contact Section -->
+<div class="container" id="contact" style="text-align: center; margin-top:14px; padding-bottom:19px; text-decoration: underline; font-weight: 600;">
+    <h2>Contact us</h2>
+</div>
+
+<!-- Footer Section -->
+<div class="container d-flex flex-wrap gap-4" style="padding:10px;background-color: #e6e7e7;border-radius: 8px;">
+    <div class="column" style="flex: 1; min-width: 250px;">
+        <h5>Movie Buzz</h5>
+        <p>The movie recommendation system suggests films based on user preferences using machine learning and similarity algorithms.</p>
+        <a href="https://www.linkedin.com/in/bahauddin-sakib-357345230/" target="_blank">
+            <i class="fa-brands fa-linkedin fa-2x" style="padding:2px; color:black"></i>
+        </a>
+        <a href="https://github.com/BahauddinSakib" target="_blank">
+            <i class="fa-brands fa-github fa-2x" style="color:black"></i>
+        </a>
+    </div>
+
+    <div class="column" style="flex: 1; min-width: 250px;">
+        <h6>Company</h6>
+        <p><a href="#about">About us</a></p>
+        <p><a href="#topRatedSection">Top rated</a></p>
+        <p><a href="#pricing">Pricing</a></p>
+        <p><a href="#contact">Contact</a></p>
+    </div>
+
+    <div class="column" style="flex: 1; min-width: 250px;">
+        <h6>Contact Us</h6>
+        <form>
+            <input type="text" placeholder="Your Name" required class="form-control mb-3">
+            <input type="email" placeholder="Your Email" required class="form-control mb-3">
+            <textarea placeholder="Your Message" required class="form-control mb-3"></textarea>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</div>
+<div class="container" style="text-align: center">
+    <p>Created by -Bahauddin Sakib | 2025</p>
+</div>
+
+
+<script>
+    // Fetch Top Rated Movies from the API
+    function fetchTopRatedMovies() {
+        fetch("https://api.themoviedb.org/3/movie/top_rated?api_key=c7ec19ffdd3279641fb606d19ceb9bb1")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Log the response to check the structure
+
+                const topRatedContainer = document.getElementById("topRatedMoviesContainer");
+                topRatedContainer.innerHTML = "";
+
+                // Display only top 8 movies
+                if (data.results && data.results.length > 0) {
+                    data.results.slice(0, 8).forEach(movie => {
+                        topRatedContainer.innerHTML += `
+                            <div class="col">
+                                <div class="movie-card">
+                                    <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" class="img-fluid">
+                                    <h5>${movie.title}</h5>
+                                    <p>⭐ ${movie.vote_average}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    // Ensure the top-rated section is visible
+                    document.getElementById("topRatedSection").style.display = "block";
+                } else {
+                    topRatedContainer.innerHTML = "<p>No top-rated movies found.</p>";
+                }
+            })
+            .catch(err => {
+                console.error("Error fetching top-rated movies:", err);
+                document.getElementById("topRatedMoviesContainer").innerHTML = "<p>Error fetching top-rated movies.</p>";
+            });
+    }
+
+    // Call fetchTopRatedMovies when the page loads
+    window.onload = function() {
+        fetchTopRatedMovies(); // Fetch and display top-rated movies on page load
+    };
+
+    // Fetch Movie Suggestions for Search
+    document.getElementById("searchInput").addEventListener("input", function() {
+        const query = this.value;
+        if (query.length < 2) return;
+
+        fetch("/suggest?query=" + query)
+            .then(response => response.json())
+            .then(data => {
+                const datalist = document.getElementById("movieSuggestions");
+                datalist.innerHTML = "";
+                data.suggestions.forEach(movie => {
+                    const option = document.createElement("option");
+                    option.value = movie;
+                    datalist.appendChild(option);
+                });
+            })
+            .catch(error => console.error("Error fetching suggestions:", error));
+    });
+
+    // Search Movie Function
+    function searchMovie() {
+        const movieName = document.getElementById("searchInput").value;
+        if (!movieName) {
+            alert("Please enter a movie name!");
+            return;
+        }
+
+        fetch("/recommend", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ movie: movieName })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Movie not found");
+            return response.json();
+        })
+        .then(data => {
+            const container = document.getElementById("moviesContainer");
+            container.innerHTML = "";
+
+            data.movies.forEach((movie, index) => {
+                container.innerHTML += `
+                    <div class="col">
+                        <div class="movie-card">
+                            <img src="${data.posters[index]}" alt="${movie}" class="img-fluid">
+                            <h5>${movie}</h5>
+                            <p>⭐ ${data.ratings[index]}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById("recommendationSection").style.display = "block";
+        })
+        .catch(err => alert(err.message));
+   }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
