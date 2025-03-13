@@ -1,22 +1,38 @@
-
 from flask import Flask, request, jsonify, render_template
 import pickle
 import pandas as pd
 import requests
+import os
+import gdown
 
 app = Flask(__name__)
 
-# Load pre-trained models
-movies = pickle.load(open("movies_list.pkl", 'rb'))
-similarity = pickle.load(open("similarity.pkl", 'rb'))
+# Google Drive file ID for similarity.pkl
+SIMILARITY_FILE_ID = "1fHk5cRIP5zVElTTqIrCVDkHMWPV0-Pcb"  # Replace with actual Google Drive ID
 
+# Local paths
+MOVIES_PATH = "D:/Movie_Recomender/models/movies_list.pkl"  # Keep local movies file
+SIMILARITY_PATH = "similarity.pkl"  # Downloaded file
+
+# Function to download similarity.pkl from Google Drive
+def download_file(file_id, dest_path):
+    if not os.path.exists(dest_path):
+        print(f"Downloading {dest_path} from Google Drive...")
+        gdown.download(f"https://drive.google.com/uc?export=download&id={file_id}", dest_path, quiet=False)
+        print(f"Download complete: {dest_path}")
+
+# Download similarity file
+download_file(SIMILARITY_FILE_ID, SIMILARITY_PATH)
+
+# Load pre-trained models
+movies = pickle.load(open(MOVIES_PATH, 'rb'))  # Local file
+similarity = pickle.load(open(SIMILARITY_PATH, 'rb'))  # Downloaded file
 
 # TMDB API Key
 API_KEY = "c7ec19ffdd3279641fb606d19ceb9bb1"
 
-
 def fetch_movie_details(movie_id):
-    #Fetch movie poster and rating from TMDB.
+    """ Fetch movie poster and rating from TMDB. """
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}&language=en-US"
     data = requests.get(url).json()
 
@@ -28,11 +44,9 @@ def fetch_movie_details(movie_id):
         'rating': rating
     }
 
-
 @app.route('/')
 def home():
     return render_template('index.html')
-
 
 @app.route('/suggest', methods=['GET'])
 def suggest():
@@ -40,11 +54,8 @@ def suggest():
     if not query:
         return jsonify({'suggestions': []})
 
-    # Filter movies whose title starts with the query
     suggestions = movies[movies['title'].str.lower().str.startswith(query)]['title'].tolist()
-
     return jsonify({'suggestions': suggestions[:10]})  # Limit suggestions to 10
-
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
@@ -78,9 +89,9 @@ def recommend():
     except IndexError:
         return jsonify({'message': 'Movie not found'}), 404
 
-
 if __name__ == '__main__':
     print(app.url_map)  # To check registered routes
-    app.run(debug=True)  #auto run when code changes
+    app.run(debug=True)
+
 
 
