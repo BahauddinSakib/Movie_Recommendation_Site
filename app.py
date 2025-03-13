@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, render_template
 import pickle
-import pandas as pd
 import requests
 import os
 import gdown
@@ -11,8 +10,8 @@ app = Flask(__name__)
 SIMILARITY_FILE_ID = "1fHk5cRIP5zVElTTqIrCVDkHMWPV0-Pcb"  # Confirmed same ID
 
 # Local paths
-MOVIES_PATH = "D:/Movie_Recomender/models/movies_list.pkl"  # Local movies file
-SIMILARITY_PATH = "similarity.pkl"  # Downloaded file
+MOVIES_PATH = "movies_list.pkl"  # Updated path for the movie list
+SIMILARITY_PATH = "similarity.pkl"  # No change for similarity.pkl
 
 # Function to download similarity.pkl from Google Drive
 def download_file(file_id, dest_path):
@@ -92,6 +91,5 @@ def recommend():
 if __name__ == '__main__':
     print(app.url_map)  # To check registered routes
     app.run(debug=True)
-
 
 
