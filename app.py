@@ -8,10 +8,10 @@ import gdown
 app = Flask(__name__)
 
 # Google Drive file ID for similarity.pkl
-SIMILARITY_FILE_ID = "1fHk5cRIP5zVElTTqIrCVDkHMWPV0-Pcb"  # Replace with actual Google Drive ID
+SIMILARITY_FILE_ID = "1fHk5cRIP5zVElTTqIrCVDkHMWPV0-Pcb"  # Confirmed same ID
 
 # Local paths
-MOVIES_PATH = "D:/Movie_Recomender/models/movies_list.pkl"  # Keep local movies file
+MOVIES_PATH = "D:/Movie_Recomender/models/movies_list.pkl"  # Local movies file
 SIMILARITY_PATH = "similarity.pkl"  # Downloaded file
 
 # Function to download similarity.pkl from Google Drive
